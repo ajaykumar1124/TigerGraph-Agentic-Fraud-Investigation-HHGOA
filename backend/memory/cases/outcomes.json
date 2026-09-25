@@ -1,0 +1,65 @@
+[
+  {
+    "case_id": "CASE_3EF68E76",
+    "predicted_fraud": true,
+    "actual_fraud": false,
+    "confidence": 0.7175189163930253,
+    "action_taken": "BLOCK",
+    "notes": "Benchmark test: Low Risk Normal Transaction",
+    "recorded_at": "2026-09-23T15:47:01.770372"
+  },
+  {
+    "case_id": "CASE_9D7B8E4F",
+    "predicted_fraud": false,
+    "actual_fraud": false,
+    "confidence": 0.0,
+    "action_taken": "PENDING",
+    "notes": "Benchmark test: Medium Risk with Velocity Check",
+    "recorded_at": "2026-09-23T15:47:10.505428"
+  },
+  {
+    "case_id": "CASE_D916F4E9",
+    "predicted_fraud": false,
+    "actual_fraud": true,
+    "confidence": 0.0,
+    "action_taken": "PENDING",
+    "notes": "Benchmark test: High Risk Account Takeover",
+    "recorded_at": "2026-09-23T15:47:19.213363"
+  },
+  {
+    "case_id": "CASE_81C929CA",
+    "predicted_fraud": false,
+    "actual_fraud": true,
+    "confidence": 0.0,
+    "action_taken": "PENDING",
+    "notes": "Benchmark test: Critical Risk Pattern Match",
+    "recorded_at": "2026-09-23T15:47:27.973657"
+  },
+  {
+    "case_id": "CASE_DC677E92",
+    "predicted_fraud": false,
+    "actual_fraud": false,
+    "confidence": 0.0,
+    "action_taken": "PENDING",
+    "notes": "Benchmark test: Medium Risk False Positive",
+    "recorded_at": "2026-09-23T15:47:36.709726"
+  },
+  {
+    "case_id": "CASE_AF2CE01B",
+    "predicted_fraud": false,
+    "actual_fraud": true,
+    "confidence": 0.0,
+    "action_taken": "BLOCK",
+    "notes": "Test outcome",
+    "recorded_at": "2026-09-23T15:51:20.399893"
+  },
+  {
+    "case_id": "CASE_CD25B084",
+    "predicted_fraud": true,
+    "actual_fraud": true,
+    "confidence": 0.8273782331267695,
+    "action_taken": "BLOCK",
+    "notes": "Test outcome",
+    "recorded_at": "2026-09-23T16:23:47.394896"
+  }
+]

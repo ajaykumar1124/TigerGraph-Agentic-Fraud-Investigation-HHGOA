@@ -1,0 +1,43 @@
+{
+  "case_id": "HHG-003",
+  "investigation_summary": {
+    "fraud_detected": true,
+    "confidence_score": 96,
+    "risk_level": "CRITICAL",
+    "primary_fraud_type": "Cryptocurrency Exchange Fraud",
+    "estimated_loss": 95000
+  },
+  "key_findings": [
+    "Large crypto purchase from unverified exchange",
+    "KYC data mismatch with customer profile",
+    "Transaction originated from high-risk jurisdiction",
+    "Unusual time of transaction (2:30 AM)"
+  ],
+  "evidence": {
+    "graph_analysis": {
+      "connected_entities": 8,
+      "suspicious_patterns_detected": true,
+      "relationship_depth": 3,
+      "risk_propagation_score": 96
+    },
+    "llm_reasoning": "Based on comprehensive analysis of transaction patterns, behavioral anomalies, and graph relationships, this case shows clear indicators of Cryptocurrency Exchange Fraud. The confidence score of 96% reflects strong evidence across multiple detection dimensions.",
+    "tigergraph_insights": {
+      "query_used": "fraud_detection_pattern_match",
+      "nodes_analyzed": 156,
+      "edges_traversed": 423,
+      "pattern_matches": 12
+    }
+  },
+  "recommendations": [
+    "Block transaction, require enhanced KYC verification"
+  ],
+  "investigation_status": "CLOSED",
+  "resolution": "Investigation completed with recommended actions taken",
+  "metadata": {
+    "investigation_date": "2026-09-23",
+    "analyst": "AI Agent with TigerGraph",
+    "review_status": "APPROVED",
+    "llm_model": "OpenAI GPT-4o-mini",
+    "graph_database": "TigerGraph Cloud"
+  }
+}

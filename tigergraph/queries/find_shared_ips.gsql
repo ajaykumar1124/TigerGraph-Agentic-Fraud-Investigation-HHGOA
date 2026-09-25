@@ -1,0 +1,63 @@
+/**
+ * QUERY: Find Shared IPs
+ * 
+ * Purpose: Identify all customers who share an IP address with a given customer
+ * High-risk signal: Multiple customers from same IP = potential fraud network
+ * 
+ * Input: customer_id, ip_threshold (min # of customers per IP)
+ * Output: List of connected customers, IP details, geographic info
+ */
+
+CREATE QUERY find_shared_ips(
+  STRING customer_id,
+  INT ip_threshold = 1
+) FOR GRAPH fraud_investigation {
+  
+  SetAccum<VERTEX> shared_ip_customers;
+  SetAccum<VERTEX> ips_used;
+  MapAccum<VERTEX, INT> customer_ip_count;
+  MapAccum<STRING, INT> ip_customer_count;
+  
+  // Step 1: Find IPs used by the input customer
+  ips_used = 
+    SELECT ip FROM Customer:c -(USES_IP)-> IPAddress:ip
+    WHERE c.customer_id == customer_id
+    ACCUM ip += ips_used;
+  
+  // Step 2: For each IP, count customers
+  FOREACH ip_vertex IN ips_used DO
+    INT cust_count =
+      SELECT COUNT(DISTINCT c.customer_id) FROM IPAddress:ip -(USED_BY_CUSTOMER_IP)-> Customer:c
+      WHERE ip.ip_address == ip_vertex.ip_address;
+    
+    ip_customer_count += (ip_vertex.ip_address -> cust_count);
+  END;
+  
+  // Step 3: Find all customers using those IPs (filtering by threshold)
+  shared_ip_customers =
+    SELECT c FROM IPAddress:ip -(USED_BY_CUSTOMER_IP)-> Customer:c
+    WHERE ip IN ips_used 
+      AND ip_customer_count.get(ip.ip_address) >= ip_threshold
+    ACCUM c += shared_ip_customers;
+  
+  // Step 4: Remove the original customer from results
+  shared_ip_customers -= 
+    SELECT c FROM Customer:c
+    WHERE c.customer_id == customer_id;
+  
+  // Step 5: Enrich results
+  SetAccum<VERTEX> result_customers;
+  result_customers =
+    SELECT c FROM Customer:c
+    WHERE c IN shared_ip_customers
+    POST-ACCUM 
+      c.@ips_shared_count = ips_used.size(),
+      c.@customer_ip_count = customer_ip_count.get(c),
+      c.@risk_level = CASE 
+        WHEN ip_customer_count.get(c.customer_id) > 5 THEN "HIGH"
+        WHEN ip_customer_count.get(c.customer_id) > 3 THEN "MEDIUM"
+        ELSE "LOW"
+      END;
+  
+  PRINT result_customers;
+}

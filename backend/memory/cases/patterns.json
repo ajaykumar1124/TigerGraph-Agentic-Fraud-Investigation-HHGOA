@@ -1,0 +1,9 @@
+{
+  "metrics": {
+    "total": 7,
+    "correct": 3,
+    "false_positives": 1,
+    "false_negatives": 3,
+    "avg_confidence": 0.22069959278854215
+  }
+}

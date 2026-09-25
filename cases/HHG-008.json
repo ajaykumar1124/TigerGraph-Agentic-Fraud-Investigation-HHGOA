@@ -1,0 +1,43 @@
+{
+  "case_id": "HHG-008",
+  "investigation_summary": {
+    "fraud_detected": true,
+    "confidence_score": 88,
+    "risk_level": "HIGH",
+    "primary_fraud_type": "E-commerce Fraud - Account Takeover",
+    "estimated_loss": 15000
+  },
+  "key_findings": [
+    "Multiple e-commerce purchases to new shipping address",
+    "Email change request 1 hour before purchases",
+    "Different device and IP address than historical pattern",
+    "High-value electronics ordered for express delivery"
+  ],
+  "evidence": {
+    "graph_analysis": {
+      "connected_entities": 8,
+      "suspicious_patterns_detected": true,
+      "relationship_depth": 3,
+      "risk_propagation_score": 88
+    },
+    "llm_reasoning": "Based on comprehensive analysis of transaction patterns, behavioral anomalies, and graph relationships, this case shows clear indicators of E-commerce Fraud - Account Takeover. The confidence score of 88% reflects strong evidence across multiple detection dimensions.",
+    "tigergraph_insights": {
+      "query_used": "fraud_detection_pattern_match",
+      "nodes_analyzed": 156,
+      "edges_traversed": 423,
+      "pattern_matches": 12
+    }
+  },
+  "recommendations": [
+    "Cancel orders, lock account, contact customer"
+  ],
+  "investigation_status": "CLOSED",
+  "resolution": "Investigation completed with recommended actions taken",
+  "metadata": {
+    "investigation_date": "2026-09-23",
+    "analyst": "AI Agent with TigerGraph",
+    "review_status": "APPROVED",
+    "llm_model": "OpenAI GPT-4o-mini",
+    "graph_database": "TigerGraph Cloud"
+  }
+}

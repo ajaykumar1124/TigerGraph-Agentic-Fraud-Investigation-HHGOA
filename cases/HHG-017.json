@@ -1,0 +1,43 @@
+{
+  "case_id": "HHG-017",
+  "investigation_summary": {
+    "fraud_detected": true,
+    "confidence_score": 89,
+    "risk_level": "HIGH",
+    "primary_fraud_type": "Romance Scam - Social Engineering",
+    "estimated_loss": 45000
+  },
+  "key_findings": [
+    "Multiple transfers to same overseas recipient",
+    "Customer contacted after family reported concern",
+    "Recipient profile matches known romance scam pattern",
+    "Customer emotionally invested, initially denied fraud"
+  ],
+  "evidence": {
+    "graph_analysis": {
+      "connected_entities": 8,
+      "suspicious_patterns_detected": true,
+      "relationship_depth": 3,
+      "risk_propagation_score": 89
+    },
+    "llm_reasoning": "Based on comprehensive analysis of transaction patterns, behavioral anomalies, and graph relationships, this case shows clear indicators of Romance Scam - Social Engineering. The confidence score of 89% reflects strong evidence across multiple detection dimensions.",
+    "tigergraph_insights": {
+      "query_used": "fraud_detection_pattern_match",
+      "nodes_analyzed": 156,
+      "edges_traversed": 423,
+      "pattern_matches": 12
+    }
+  },
+  "recommendations": [
+    "Block further transfers, victim support services, education"
+  ],
+  "investigation_status": "CLOSED",
+  "resolution": "Investigation completed with recommended actions taken",
+  "metadata": {
+    "investigation_date": "2026-09-23",
+    "analyst": "AI Agent with TigerGraph",
+    "review_status": "APPROVED",
+    "llm_model": "OpenAI GPT-4o-mini",
+    "graph_database": "TigerGraph Cloud"
+  }
+}

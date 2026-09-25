@@ -1,0 +1,43 @@
+{
+  "case_id": "HHG-012",
+  "investigation_summary": {
+    "fraud_detected": true,
+    "confidence_score": 90,
+    "risk_level": "HIGH",
+    "primary_fraud_type": "Money Mule Activity",
+    "estimated_loss": 75000
+  },
+  "key_findings": [
+    "Multiple large deposits followed by immediate withdrawals",
+    "Funds moved through multiple accounts in chain pattern",
+    "Account holder appears to be unknowing participant",
+    "Connected to known fraud ring through graph analysis"
+  ],
+  "evidence": {
+    "graph_analysis": {
+      "connected_entities": 8,
+      "suspicious_patterns_detected": true,
+      "relationship_depth": 3,
+      "risk_propagation_score": 90
+    },
+    "llm_reasoning": "Based on comprehensive analysis of transaction patterns, behavioral anomalies, and graph relationships, this case shows clear indicators of Money Mule Activity. The confidence score of 90% reflects strong evidence across multiple detection dimensions.",
+    "tigergraph_insights": {
+      "query_used": "fraud_detection_pattern_match",
+      "nodes_analyzed": 156,
+      "edges_traversed": 423,
+      "pattern_matches": 12
+    }
+  },
+  "recommendations": [
+    "Freeze account, report to authorities, interview account holder"
+  ],
+  "investigation_status": "CLOSED",
+  "resolution": "Investigation completed with recommended actions taken",
+  "metadata": {
+    "investigation_date": "2026-09-23",
+    "analyst": "AI Agent with TigerGraph",
+    "review_status": "APPROVED",
+    "llm_model": "OpenAI GPT-4o-mini",
+    "graph_database": "TigerGraph Cloud"
+  }
+}

@@ -1,0 +1,136 @@
+/**
+ * QUERY: Get Investigation Context
+ * 
+ * Purpose: Retrieve all relevant information for a fraud case investigation
+ * Combines: transactions, devices, IPs, merchants, prior relationships
+ * 
+ * Input: case_id
+ * Output: Complete investigation context (one comprehensive query)
+ */
+
+CREATE QUERY get_investigation_context(
+  STRING case_id
+) FOR GRAPH fraud_investigation {
+  
+  // Initialize sets to collect all context
+  SetAccum<VERTEX> main_case;
+  SetAccum<VERTEX> transactions;
+  SetAccum<VERTEX> customers;
+  SetAccum<VERTEX> devices;
+  SetAccum<VERTEX> ips;
+  SetAccum<VERTEX> merchants;
+  SetAccum<VERTEX> patterns;
+  SetAccum<VERTEX> evidence;
+  SetAccum<VERTEX> actions;
+  SetAccum<VERTEX> related_cases;
+  
+  MapAccum<STRING, STRING> case_details;
+  MapAccum<STRING, INT> transaction_metrics;
+  MapAccum<STRING, DOUBLE> risk_metrics;
+  
+  // Step 1: Get the main case
+  main_case =
+    SELECT c FROM FraudCase:c
+    WHERE c.case_id == case_id
+    ACCUM c += main_case;
+  
+  IF main_case.size() == 0 THEN
+    PRINT "Case not found";
+    RETURN;
+  END;
+  
+  VERTEX case_vertex = main_case.getFirst();
+  
+  // Step 2: Get all transactions related to this case
+  transactions =
+    SELECT t FROM FraudCase:c -(INVESTIGATES)-> Transaction:t
+    WHERE c == case_vertex
+    UNION
+    SELECT t FROM FraudCase:c -(INVESTIGATES)-> Transaction:t
+    WHERE c.customer_id == case_vertex.customer_id
+    LIMIT 100;
+  
+  // Step 3: Get customer(s)
+  customers =
+    SELECT c FROM FraudCase:fc -(INVESTIGATES)-> Transaction:t -(PERFORMED_BY)-> Customer:c
+    WHERE fc == case_vertex
+    UNION
+    SELECT c FROM Customer:c
+    WHERE c.customer_id == case_vertex.customer_id;
+  
+  // Step 4: Get devices used in these transactions
+  devices =
+    SELECT d FROM Customer:c -(USES_DEVICE)-> Device:d
+    WHERE c IN customers
+    ACCUM d += devices;
+  
+  // Step 5: Get IPs used in these transactions
+  ips =
+    SELECT ip FROM Customer:c -(USES_IP)-> IPAddress:ip
+    WHERE c IN customers
+    ACCUM ip += ips;
+  
+  // Step 6: Get merchants involved
+  merchants =
+    SELECT m FROM Transaction:t -(TRANSACTION_TO)-> Merchant:m
+    WHERE t IN transactions
+    ACCUM m += merchants;
+  
+  // Step 7: Get fraud patterns
+  patterns =
+    SELECT p FROM FraudCase:c -(MATCHES_PATTERN)-> FraudPattern:p
+    WHERE c == case_vertex;
+  
+  // Step 8: Get evidence collected
+  evidence =
+    SELECT e FROM FraudCase:c -(HAS_EVIDENCE)-> Evidence:e
+    WHERE c == case_vertex;
+  
+  // Step 9: Get recommended actions
+  actions =
+    SELECT a FROM FraudCase:c -(RECOMMENDS_ACTION)-> Action:a
+    WHERE c == case_vertex;
+  
+  // Step 10: Get related cases (same customer or pattern)
+  related_cases =
+    SELECT c FROM FraudCase:c
+    WHERE (c.customer_id == case_vertex.customer_id
+       OR c.fraud_pattern_detected == case_vertex.fraud_pattern_detected)
+      AND c.case_id != case_id
+      AND c.case_status == "CLOSED"
+    LIMIT 5;
+  
+  // Step 11: Compile metrics
+  case_details += ("case_id" -> case_vertex.case_id);
+  case_details += ("customer_id" -> case_vertex.customer_id);
+  case_details += ("case_status" -> case_vertex.case_status);
+  case_details += ("trigger_type" -> case_vertex.trigger_type);
+  case_details += ("fraud_pattern" -> case_vertex.fraud_pattern_detected);
+  case_details += ("approval_status" -> case_vertex.approval_status);
+  
+  transaction_metrics += ("total_transactions" -> transactions.size());
+  transaction_metrics += ("unique_customers" -> customers.size());
+  transaction_metrics += ("unique_devices" -> devices.size());
+  transaction_metrics += ("unique_ips" -> ips.size());
+  transaction_metrics += ("unique_merchants" -> merchants.size());
+  transaction_metrics += ("evidence_count" -> evidence.size());
+  transaction_metrics += ("related_cases" -> related_cases.size());
+  
+  risk_metrics += ("initial_risk_score" -> case_vertex.initial_risk_score);
+  risk_metrics += ("current_risk_score" -> case_vertex.current_risk_score);
+  risk_metrics += ("confidence_score" -> case_vertex.confidence_score);
+  
+  // Step 12: Format output
+  PRINT case_details;
+  PRINT transaction_metrics;
+  PRINT risk_metrics;
+  PRINT transactions;
+  PRINT customers;
+  PRINT devices;
+  PRINT ips;
+  PRINT merchants;
+  PRINT patterns;
+  PRINT evidence;
+  PRINT actions;
+  PRINT related_cases;
+}

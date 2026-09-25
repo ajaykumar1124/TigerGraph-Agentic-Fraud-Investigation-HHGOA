@@ -1,0 +1,234 @@
+/**
+ * TIGERGRAPH SCHEMA FOR FRAUD INVESTIGATION
+ * 
+ * Entities (Vertices):
+ * - Customer: Bank customer
+ * - Account: Bank account or card
+ * - Transaction: Payment or transfer event
+ * - Device: Physical device (phone, computer, etc.)
+ * - IPAddress: IP address from transaction
+ * - Merchant: Merchant or beneficiary
+ * - FraudCase: Investigation case record
+ * - FraudPattern: Known fraud typology
+ * - Evidence: Investigation evidence
+ * - Action: Recommended or taken action
+ * 
+ * Relationships (Edges):
+ * - Customer OWNS Account
+ * - Customer PERFORMS Transaction
+ * - Customer USES Device
+ * - Customer USES_IP IPAddress
+ * - Transaction TO Merchant
+ * - Device SEEN_IN_IP IPAddress
+ * - FraudCase INVESTIGATES Transaction
+ * - FraudCase MATCHES FraudPattern
+ * - FraudCase HAS Evidence
+ * - FraudCase RECOMMENDS Action
+ * - Evidence FROM_SOURCE (Device, IP, Transaction, etc.)
+ * - Transaction PART_OF FraudCase
+ */
+
+CREATE GRAPH fraud_investigation (
+  *
+)
+
+/**
+ * VERTEX TYPES
+ */
+
+CREATE VERTEX Customer (
+  PRIMARY_ID customer_id STRING,
+  email STRING,
+  phone STRING,
+  account_status STRING,
+  created_date DATETIME,
+  risk_profile STRING DEFAULT "NORMAL",
+  fraud_history_count INT DEFAULT 0
+) WITH primary_key="customer_id"
+
+CREATE VERTEX Account (
+  PRIMARY_ID account_id STRING,
+  account_type STRING,  // CREDIT_CARD, DEBIT_CARD, BANK_ACCOUNT
+  card_last_4 STRING,
+  is_active BOOL DEFAULT TRUE,
+  created_date DATETIME
+) WITH primary_key="account_id"
+
+CREATE VERTEX Transaction (
+  PRIMARY_ID transaction_id STRING,
+  customer_id STRING,
+  account_id STRING,
+  amount DOUBLE,
+  currency STRING DEFAULT "USD",
+  product_code STRING,
+  timestamp DATETIME,
+  status STRING,  // COMPLETED, PENDING, FAILED, BLOCKED
+  bank_risk_score FLOAT,
+  is_fraud INT DEFAULT 0
+) WITH primary_key="transaction_id"
+
+CREATE VERTEX Device (
+  PRIMARY_ID device_id STRING,
+  device_type STRING,  // MOBILE, DESKTOP, TABLET, UNKNOWN
+  device_os STRING,
+  browser STRING,
+  user_agent STRING,
+  first_seen DATETIME,
+  last_seen DATETIME,
+  customer_count INT DEFAULT 1
+) WITH primary_key="device_id"
+
+CREATE VERTEX IPAddress (
+  PRIMARY_ID ip_address STRING,
+  country STRING,
+  city STRING,
+  latitude DOUBLE,
+  longitude DOUBLE,
+  isp STRING,
+  first_seen DATETIME,
+  last_seen DATETIME,
+  customer_count INT DEFAULT 1
+) WITH primary_key="ip_address"
+
+CREATE VERTEX Merchant (
+  PRIMARY_ID merchant_id STRING,
+  merchant_name STRING,
+  merchant_category STRING,
+  country STRING,
+  risk_level STRING DEFAULT "NORMAL"
+) WITH primary_key="merchant_id"
+
+CREATE VERTEX FraudCase (
+  PRIMARY_ID case_id STRING,
+  customer_id STRING,
+  trigger_transaction_id STRING,
+  trigger_type STRING,  // HIGH_RISK, VELOCITY, NETWORK, PATTERN, ANALYST_REPORT
+  case_status STRING DEFAULT "OPEN",  // OPEN, INVESTIGATING, RECOMMENDED, APPROVED, CLOSED
+  initial_risk_score FLOAT,
+  current_risk_score FLOAT,
+  confidence_score FLOAT DEFAULT 0.0,
+  fraud_pattern_detected STRING,
+  created_timestamp DATETIME,
+  updated_timestamp DATETIME,
+  investigation_notes STRING,
+  approval_status STRING DEFAULT "PENDING"  // PENDING, APPROVED, REJECTED
+) WITH primary_key="case_id"
+
+CREATE VERTEX FraudPattern (
+  PRIMARY_ID pattern_id STRING,
+  pattern_name STRING,  // ACCOUNT_TAKEOVER, PAYMENT_FRAUD, CARD_FRAUD, FRAUD_NETWORK, VELOCITY_ANOMALY
+  description STRING,
+  indicators LIST<STRING>,
+  risk_weight FLOAT
+) WITH primary_key="pattern_id"
+
+CREATE VERTEX Evidence (
+  PRIMARY_ID evidence_id STRING,
+  case_id STRING,
+  evidence_type STRING,  // SHARED_DEVICE, SHARED_IP, VELOCITY_ANOMALY, PATTERN_MATCH, HISTORICAL_CASE, BEHAVIORAL_ANOMALY
+  description STRING,
+  confidence FLOAT,
+  source_entity_id STRING,
+  source_entity_type STRING,  // DEVICE, IP, TRANSACTION, CUSTOMER, MERCHANT
+  created_timestamp DATETIME,
+  supporting_data MAP<STRING, STRING>
+) WITH primary_key="evidence_id"
+
+CREATE VERTEX Action (
+  PRIMARY_ID action_id STRING,
+  case_id STRING,
+  action_type STRING,  // BLOCK_ACCOUNT, HOLD_TRANSACTION, REQUEST_AUTH, ESCALATE, ALLOW, MONITOR
+  action_status STRING DEFAULT "RECOMMENDED",  // RECOMMENDED, REQUESTED, PENDING_APPROVAL, APPROVED, EXECUTED, REJECTED
+  approval_required BOOL,
+  approval_required_role STRING,  // ANALYST, SENIOR_ANALYST, MANAGER
+  rationale STRING,
+  created_timestamp DATETIME,
+  executed_timestamp DATETIME,
+  executed_by STRING
+) WITH primary_key="action_id"
+
+CREATE VERTEX InvestigationLog (
+  PRIMARY_ID log_id STRING,
+  case_id STRING,
+  log_type STRING,  // AGENT_THOUGHT, EVIDENCE_FOUND, RISK_CALCULATED, ACTION_RECOMMENDED
+  timestamp DATETIME,
+  message STRING,
+  risk_score FLOAT,
+  confidence FLOAT
+) WITH primary_key="log_id"
+
+/**
+ * EDGE TYPES
+ */
+
+CREATE DIRECTED EDGE OWNS (FROM Customer, TO Account) 
+WITH REVERSE_EDGE="OWNED_BY"
+
+CREATE DIRECTED EDGE PERFORMS (FROM Customer, TO Transaction)
+WITH REVERSE_EDGE="PERFORMED_BY"
+
+CREATE DIRECTED EDGE USES_DEVICE (FROM Customer, TO Device)
+WITH REVERSE_EDGE="USED_BY_CUSTOMER",
+user_count INT DEFAULT 1
+
+CREATE DIRECTED EDGE USES_IP (FROM Customer, TO IPAddress)
+WITH REVERSE_EDGE="USED_BY_CUSTOMER_IP",
+user_count INT DEFAULT 1
+
+CREATE DIRECTED EDGE TRANSACTION_TO (FROM Transaction, TO Merchant)
+WITH REVERSE_EDGE="RECEIVES_TRANSACTION",
+count INT DEFAULT 1
+
+CREATE DIRECTED EDGE SEEN_IN_TRANSACTION (FROM Device, TO IPAddress)
+WITH REVERSE_EDGE="DEVICE_SEEN_FROM_IP",
+count INT DEFAULT 1
+
+CREATE DIRECTED EDGE INVESTIGATES (FROM FraudCase, TO Transaction)
+WITH REVERSE_EDGE="INVESTIGATED_BY"
+
+CREATE DIRECTED EDGE MATCHES_PATTERN (FROM FraudCase, TO FraudPattern)
+WITH REVERSE_EDGE="MATCHED_BY_CASE"
+
+CREATE DIRECTED EDGE HAS_EVIDENCE (FROM FraudCase, TO Evidence)
+WITH REVERSE_EDGE="EVIDENCE_FOR"
+
+CREATE DIRECTED EDGE RECOMMENDS_ACTION (FROM FraudCase, TO Action)
+WITH REVERSE_EDGE="ACTION_FOR"
+
+CREATE DIRECTED EDGE RELATED_CASE (FROM FraudCase, TO FraudCase)
+WITH REVERSE_EDGE="RELATED_FROM"
+
+CREATE DIRECTED EDGE FROM_TRANSACTION (FROM Evidence, TO Transaction)
+WITH REVERSE_EDGE="TRANSACTION_EVIDENCE"
+
+CREATE DIRECTED EDGE FROM_DEVICE (FROM Evidence, TO Device)
+WITH REVERSE_EDGE="DEVICE_EVIDENCE"
+
+CREATE DIRECTED EDGE FROM_IP (FROM Evidence, TO IPAddress)
+WITH REVERSE_EDGE="IP_EVIDENCE"
+
+CREATE DIRECTED EDGE FROM_MERCHANT (FROM Evidence, TO Merchant)
+WITH REVERSE_EDGE="MERCHANT_EVIDENCE"
+
+CREATE DIRECTED EDGE INVESTIGATION_LOG (FROM FraudCase, TO InvestigationLog)
+WITH REVERSE_EDGE="LOG_FOR_CASE"
+
+/**
+ * GRAPH DEFINITION
+ */
+
+CREATE GRAPH fraud_investigation (
+  Customer, Account, Transaction, Device, IPAddress, Merchant,
+  FraudCase, FraudPattern, Evidence, Action, InvestigationLog,
+  OWNS, PERFORMS, USES_DEVICE, USES_IP, TRANSACTION_TO,
+  SEEN_IN_TRANSACTION, INVESTIGATES, MATCHES_PATTERN,
+  HAS_EVIDENCE, RECOMMENDS_ACTION, RELATED_CASE,
+  FROM_TRANSACTION, FROM_DEVICE, FROM_IP, FROM_MERCHANT,
+  INVESTIGATION_LOG
+)
+
+/**
+ * GLOBAL SCHEMA ITEMS
+ */
+
+CREATE GLOBAL_SCHEMA_CHANGE ACCUM accum_list LIST<STRING>

@@ -1,0 +1,309 @@
+/* =================================================================
+   HHGOA_IEEE Fraud Investigation Graph - GSQL Schema
+   Real TigerGraph Schema for IEEE-CIS Fraud Detection
+   ================================================================= */
+
+-- Create Graph
+DROP GRAPH fraud_hhgoa;
+CREATE GRAPH fraud_hhgoa();
+USE GRAPH fraud_hhgoa;
+
+-- ================================================================
+-- VERTEX DEFINITIONS (Entities in the fraud investigation network)
+-- ================================================================
+
+-- User/Account vertex
+CREATE VERTEX User(
+    PRIMARY_ID user_id UINT,
+    email STRING,
+    phone STRING,
+    name STRING,
+    kyc_status STRING,
+    account_age_days INT,
+    risk_score FLOAT,
+    created_at TIMESTAMP,
+    last_active TIMESTAMP
+) WITH primary_id_as_attribute="true";
+
+-- Card vertex
+CREATE VERTEX Card(
+    PRIMARY_ID card_id UINT,
+    card_number STRING,
+    bin STRING,
+    card_type STRING,
+    expiry_date STRING,
+    issuer STRING,
+    is_active BOOLEAN,
+    created_at TIMESTAMP
+) WITH primary_id_as_attribute="true";
+
+-- Device vertex
+CREATE VERTEX Device(
+    PRIMARY_ID device_id STRING,
+    device_type STRING,
+    os STRING,
+    browser STRING,
+    user_agent STRING,
+    fingerprint STRING,
+    first_seen TIMESTAMP
+) WITH primary_id_as_attribute="true";
+
+-- IP Address vertex
+CREATE VERTEX IPAddress(
+    PRIMARY_ID ip_id STRING,
+    ip_address STRING,
+    country STRING,
+    region STRING,
+    city STRING,
+    is_vpn BOOLEAN,
+    is_proxy BOOLEAN,
+    is_datacenter BOOLEAN,
+    risk_level STRING
+) WITH primary_id_as_attribute="true";
+
+-- Merchant vertex
+CREATE VERTEX Merchant(
+    PRIMARY_ID merchant_id UINT,
+    merchant_name STRING,
+    mcc_code INT,
+    country STRING,
+    risk_category STRING,
+    is_high_risk BOOLEAN
+) WITH primary_id_as_attribute="true";
+
+-- Transaction vertex
+CREATE VERTEX Transaction(
+    PRIMARY_ID transaction_id STRING,
+    amount FLOAT,
+    currency STRING,
+    timestamp TIMESTAMP,
+    transaction_type STRING,
+    is_online BOOLEAN,
+    is_fraud BOOLEAN DEFAULT false,
+    fraud_score FLOAT DEFAULT 0.0
+) WITH primary_id_as_attribute="true";
+
+-- Fraud Pattern vertex
+CREATE VERTEX FraudPattern(
+    PRIMARY_ID pattern_id UINT,
+    pattern_name STRING,
+    pattern_type STRING,
+    description STRING,
+    risk_level STRING,
+    is_active BOOLEAN DEFAULT true
+) WITH primary_id_as_attribute="true";
+
+-- Fraud Policy vertex
+CREATE VERTEX Policy(
+    PRIMARY_ID policy_id UINT,
+    policy_name STRING,
+    policy_text STRING,
+    rule_type STRING,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP
+) WITH primary_id_as_attribute="true";
+
+-- Fraud Case vertex (central to investigation)
+CREATE VERTEX FraudCase(
+    PRIMARY_ID case_id STRING,
+    initiator STRING,
+    case_status STRING,
+    risk_level STRING,
+    confidence_score FLOAT,
+    investigation_depth INT,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    resolved_at TIMESTAMP,
+    resolution STRING,
+    next_action STRING
+) WITH primary_id_as_attribute="true";
+
+-- Evidence vertex
+CREATE VERTEX Evidence(
+    PRIMARY_ID evidence_id STRING,
+    evidence_type STRING,
+    description STRING,
+    weight_score FLOAT,
+    data_value STRING,
+    collected_at TIMESTAMP
+) WITH primary_id_as_attribute="true";
+
+-- Historical Case vertex (for case memory)
+CREATE VERTEX HistoricalCase(
+    PRIMARY_ID historical_case_id STRING,
+    original_case_id STRING,
+    case_outcome STRING,
+    accuracy FLOAT,
+    patterns_found LIST<STRING>,
+    lessons_learned STRING,
+    closed_at TIMESTAMP
+) WITH primary_id_as_attribute="true";
+
+-- ================================================================
+-- EDGE DEFINITIONS (Relationships in the network)
+-- ================================================================
+
+-- User owns Card
+CREATE DIRECTED EDGE OWNS_CARD(
+    FROM User,
+    TO Card,
+    since_date TIMESTAMP,
+    is_primary BOOLEAN
+);
+
+-- User uses Device
+CREATE DIRECTED EDGE USES_DEVICE(
+    FROM User,
+    TO Device,
+    first_use TIMESTAMP,
+    last_use TIMESTAMP,
+    usage_count INT
+);
+
+-- Device connects from IP
+CREATE DIRECTED EDGE CONNECTS_FROM(
+    FROM Device,
+    TO IPAddress,
+    connection_timestamp TIMESTAMP,
+    connection_duration INT
+);
+
+-- User has Transaction (with enrichment)
+CREATE DIRECTED EDGE HAS_TRANSACTION(
+    FROM User,
+    TO Transaction,
+    timestamp TIMESTAMP,
+    transaction_sequence INT
+);
+
+-- Card used in Transaction
+CREATE DIRECTED EDGE USED_IN_TRANSACTION(
+    FROM Card,
+    TO Transaction,
+    timestamp TIMESTAMP
+);
+
+-- Device used in Transaction
+CREATE DIRECTED EDGE DEVICE_IN_TRANSACTION(
+    FROM Device,
+    TO Transaction,
+    timestamp TIMESTAMP
+);
+
+-- IP Address in Transaction
+CREATE DIRECTED EDGE IP_IN_TRANSACTION(
+    FROM IPAddress,
+    TO Transaction,
+    timestamp TIMESTAMP
+);
+
+-- Transaction to Merchant
+CREATE DIRECTED EDGE TRANSACTED_WITH(
+    FROM Transaction,
+    TO Merchant,
+    amount FLOAT,
+    timestamp TIMESTAMP
+);
+
+-- Transaction indicates Fraud Pattern
+CREATE DIRECTED EDGE INDICATES_PATTERN(
+    FROM Transaction,
+    TO FraudPattern,
+    confidence FLOAT,
+    evidence_count INT
+);
+
+-- Fraud Case investigates User
+CREATE DIRECTED EDGE INVESTIGATES_USER(
+    FROM FraudCase,
+    TO User,
+    investigation_date TIMESTAMP,
+    findings STRING
+);
+
+-- Fraud Case investigates Card
+CREATE DIRECTED EDGE INVESTIGATES_CARD(
+    FROM FraudCase,
+    TO Card,
+    investigation_date TIMESTAMP,
+    findings STRING
+);
+
+-- Fraud Case investigates Device
+CREATE DIRECTED EDGE INVESTIGATES_DEVICE(
+    FROM FraudCase,
+    TO Device,
+    investigation_date TIMESTAMP,
+    findings STRING
+);
+
+-- Fraud Case investigates Transaction
+CREATE DIRECTED EDGE INVESTIGATES_TRANSACTION(
+    FROM FraudCase,
+    TO Transaction,
+    investigation_date TIMESTAMP,
+    risk_score FLOAT
+);
+
+-- Fraud Case involves Pattern
+CREATE DIRECTED EDGE INVOLVES_PATTERN(
+    FROM FraudCase,
+    TO FraudPattern,
+    match_probability FLOAT,
+    match_details STRING
+);
+
+-- Fraud Case applies Policy
+CREATE DIRECTED EDGE APPLIES_POLICY(
+    FROM FraudCase,
+    TO Policy,
+    is_violated BOOLEAN,
+    violation_severity STRING
+);
+
+-- Case collects Evidence
+CREATE DIRECTED EDGE COLLECTS_EVIDENCE(
+    FROM FraudCase,
+    TO Evidence,
+    collected_at TIMESTAMP,
+    evidence_order INT
+);
+
+-- Case references Historical Case
+CREATE DIRECTED EDGE REFERENCES_CASE(
+    FROM FraudCase,
+    TO HistoricalCase,
+    similarity_score FLOAT,
+    learning_applied STRING
+);
+
+-- User to User connection (suspicious transfers)
+CREATE DIRECTED EDGE TRANSFERS_TO(
+    FROM User,
+    TO User,
+    amount FLOAT,
+    timestamp TIMESTAMP,
+    description STRING
+);
+
+-- ================================================================
+-- INDEXES (Performance optimization)
+-- ================================================================
+
+CREATE INDEX idx_user_risk ON User(risk_score);
+CREATE INDEX idx_transaction_fraud ON Transaction(is_fraud, timestamp);
+CREATE INDEX idx_case_status ON FraudCase(case_status, created_at);
+CREATE INDEX idx_device_fingerprint ON Device(fingerprint);
+CREATE INDEX idx_ip_risk ON IPAddress(risk_level);
+CREATE INDEX idx_merchant_risk ON Merchant(is_high_risk);
+
+-- ================================================================
+-- SCHEMA SUMMARY
+-- ================================================================
+-- Total Vertices: 11
+-- Total Edges: 17
+-- Purpose: Comprehensive fraud investigation graph connecting users,
+--          cards, devices, IPs, merchants, transactions, and cases
+-- Use Case: Real-time fraud detection, pattern recognition,
+--           evidence collection, and case investigation
+-- ================================================================

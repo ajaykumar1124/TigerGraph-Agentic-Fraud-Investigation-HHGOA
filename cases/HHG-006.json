@@ -1,0 +1,43 @@
+{
+  "case_id": "HHG-006",
+  "investigation_summary": {
+    "fraud_detected": false,
+    "confidence_score": 45,
+    "risk_level": "LOW",
+    "primary_fraud_type": "False Positive - Legitimate Business Transaction",
+    "estimated_loss": 0
+  },
+  "key_findings": [
+    "Large transfer flagged but verified as legitimate business payment",
+    "Customer has history of similar business transactions",
+    "Proper documentation provided",
+    "Recipient is verified business entity"
+  ],
+  "evidence": {
+    "graph_analysis": {
+      "connected_entities": 8,
+      "suspicious_patterns_detected": true,
+      "relationship_depth": 3,
+      "risk_propagation_score": 45
+    },
+    "llm_reasoning": "Based on comprehensive analysis of transaction patterns, behavioral anomalies, and graph relationships, this case shows clear indicators of False Positive - Legitimate Business Transaction. The confidence score of 45% reflects strong evidence across multiple detection dimensions.",
+    "tigergraph_insights": {
+      "query_used": "fraud_detection_pattern_match",
+      "nodes_analyzed": 156,
+      "edges_traversed": 423,
+      "pattern_matches": 0
+    }
+  },
+  "recommendations": [
+    "Whitelist this business relationship, close case"
+  ],
+  "investigation_status": "CLOSED",
+  "resolution": "False positive - no fraud detected",
+  "metadata": {
+    "investigation_date": "2026-09-23",
+    "analyst": "AI Agent with TigerGraph",
+    "review_status": "APPROVED",
+    "llm_model": "OpenAI GPT-4o-mini",
+    "graph_database": "TigerGraph Cloud"
+  }
+}

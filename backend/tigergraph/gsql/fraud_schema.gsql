@@ -1,0 +1,39 @@
+DROP GRAPH IF EXISTS fraud_hhgoa;
+CREATE GRAPH fraud_hhgoa();
+
+CREATE SCHEMA_CHANGE JOB fraud_schema FOR GRAPH fraud_hhgoa {
+  ADD VERTEX Customer(PRIMARY_ID customer_id STRING, customer_id STRING, region STRING, risk_score DOUBLE, kyc_status STRING);
+  ADD VERTEX Device(PRIMARY_ID device_id STRING, device_id STRING, os STRING, risk_score DOUBLE, first_seen DATETIME);
+  ADD VERTEX IP(PRIMARY_ID ip_address STRING, ip_address STRING, country STRING, risk_score DOUBLE);
+  ADD VERTEX Transaction(PRIMARY_ID transaction_id STRING, transaction_id STRING, amount DOUBLE, currency STRING, timestamp DATETIME, channel STRING, status STRING);
+  ADD VERTEX FraudCase(PRIMARY_ID case_id STRING, case_id STRING, severity STRING, status STRING);
+  ADD VERTEX Pattern(PRIMARY_ID pattern_id STRING, pattern_id STRING, name STRING, description STRING);
+
+  ADD EDGE customer_has_transaction(FROM Customer, TO Transaction);
+  ADD EDGE transaction_uses_device(FROM Transaction, TO Device);
+  ADD EDGE transaction_uses_ip(FROM Transaction, TO IP);
+  ADD EDGE transaction_related_to_transaction(FROM Transaction, TO Transaction);
+  ADD EDGE customer_linked_to_device(FROM Customer, TO Device);
+  ADD EDGE transaction_matches_pattern(FROM Transaction, TO Pattern);
+  ADD EDGE case_has_transaction(FROM FraudCase, TO Transaction);
+}
+
+RUN SCHEMA_CHANGE JOB fraud_schema;
+
+CREATE OR REPLACE QUERY transaction_investigation(q_transaction_id STRING) FOR GRAPH fraud_hhgoa RETURNS (BOOL, STRING) {
+  # Step 3 GSQL: investigation across transaction, customer, device, IP, and related transactions
+  SetAccum<STRING> @related_txn_ids;
+  SetAccum<STRING> @related_patterns;
+  Start = Transaction WHERE Transaction.transaction_id == q_transaction_id;
+  Customer = SELECT tgt FROM Start:s -(customer_has_transaction)-> Customer:tgt;
+  Device = SELECT tgt FROM Start:s -(transaction_uses_device)-> Device:tgt;
+  IP = SELECT tgt FROM Start:s -(transaction_uses_ip)-> IP:tgt;
+  Related = SELECT tgt FROM Start:s -(transaction_related_to_transaction)-> Transaction:tgt;
+  PatternMatches = SELECT tgt FROM Start:s -(transaction_matches_pattern)-> Pattern:tgt;
+
+  IF Start.size() == 0 THEN
+    RETURN (FALSE, "Transaction not found");
+  END;
+
+  RETURN (TRUE, "Transaction investigation complete");
+}

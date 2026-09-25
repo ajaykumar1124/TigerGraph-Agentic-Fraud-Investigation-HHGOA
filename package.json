@@ -1,0 +1,22 @@
+{
+  "name": "tigergraph-agentic-fraud-investigation-hhgoa",
+  "version": "1.0.0",
+  "description": "**Hierarchical Heterogeneous Graph-based Orchestrated Agent Framework**",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.3",
+    "express": "^5.2.1",
+    "mongoose": "^9.10.2"
+  }
+}

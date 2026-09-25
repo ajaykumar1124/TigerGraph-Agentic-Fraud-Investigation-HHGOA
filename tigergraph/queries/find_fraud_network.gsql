@@ -1,0 +1,101 @@
+/**
+ * QUERY: Find Fraud Network
+ * 
+ * Purpose: Identify a network of potentially fraudulent accounts
+ * Connected through shared devices, IPs, and merchants
+ * 
+ * Input: customer_id, max_hops (degree of separation)
+ * Output: Network graph, centrality scores, risk assessment
+ */
+
+CREATE QUERY find_fraud_network(
+  STRING customer_id,
+  INT max_hops = 2
+) FOR GRAPH fraud_investigation {
+  
+  SetAccum<VERTEX> network_customers;
+  SetAccum<VERTEX> network_devices;
+  SetAccum<VERTEX> network_ips;
+  SetAccum<VERTEX> network_transactions;
+  SetAccum<VERTEX> network_merchants;
+  
+  MapAccum<VERTEX, INT> centrality_score;
+  
+  // Step 1: Start from input customer
+  network_customers += to_vertex(customer_id, "Customer");
+  
+  // Step 2: Hop 1 - Find connected entities
+  IF max_hops >= 1 THEN
+    // Devices
+    network_devices =
+      SELECT d FROM Customer:c -(USES_DEVICE)-> Device:d
+      WHERE c IN network_customers;
+    
+    // IPs
+    network_ips =
+      SELECT ip FROM Customer:c -(USES_IP)-> IPAddress:ip
+      WHERE c IN network_customers;
+    
+    // Transactions
+    network_transactions =
+      SELECT t FROM Customer:c -(PERFORMS)-> Transaction:t
+      WHERE c IN network_customers;
+    
+    // Merchants
+    network_merchants =
+      SELECT m FROM Transaction:t -(TRANSACTION_TO)-> Merchant:m
+      WHERE t IN network_transactions;
+    
+    // Other customers via shared devices
+    SetAccum<VERTEX> device_customers;
+    device_customers =
+      SELECT c FROM Device:d -(USED_BY_CUSTOMER)-> Customer:c
+      WHERE d IN network_devices;
+    
+    network_customers += device_customers;
+    
+    // Other customers via shared IPs
+    SetAccum<VERTEX> ip_customers;
+    ip_customers =
+      SELECT c FROM IPAddress:ip -(USED_BY_CUSTOMER_IP)-> Customer:c
+      WHERE ip IN network_ips;
+    
+    network_customers += ip_customers;
+  END;
+  
+  // Step 3: Calculate centrality (node importance)
+  FOREACH cust IN network_customers DO
+    INT degree = 0;
+    
+    // Count connections
+    degree += 
+      SELECT COUNT(*) FROM Customer:c -(USES_DEVICE)-> Device:d
+      WHERE c == cust;
+    
+    degree += 
+      SELECT COUNT(*) FROM Customer:c -(USES_IP)-> IPAddress:ip
+      WHERE c == cust;
+    
+    degree += 
+      SELECT COUNT(*) FROM Customer:c -(PERFORMS)-> Transaction:t
+      WHERE c == cust;
+    
+    centrality_score += (cust -> degree);
+  END;
+  
+  // Step 4: Rank by risk
+  SelectAccum<VERTEX> result;
+  result =
+    SELECT c FROM Customer:c
+    WHERE c IN network_customers
+    POST-ACCUM
+      c.@centrality = centrality_score.get(c),
+      c.@risk_rank = CASE
+        WHEN centrality_score.get(c) > 50 THEN "CRITICAL"
+        WHEN centrality_score.get(c) > 20 THEN "HIGH"
+        WHEN centrality_score.get(c) > 5 THEN "MEDIUM"
+        ELSE "LOW"
+      END;
+  
+  PRINT result;
+}

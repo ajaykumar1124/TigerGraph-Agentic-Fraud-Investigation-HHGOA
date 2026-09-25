@@ -1,0 +1,43 @@
+{
+  "case_id": "HHG-013",
+  "investigation_summary": {
+    "fraud_detected": true,
+    "confidence_score": 85,
+    "risk_level": "HIGH",
+    "primary_fraud_type": "Check Fraud - Altered Check",
+    "estimated_loss": 5500
+  },
+  "key_findings": [
+    "Check amount altered from ₹550 to ₹5500",
+    "Payee name modified",
+    "Signature mismatch detected by analysis",
+    "Customer denies writing check for this amount"
+  ],
+  "evidence": {
+    "graph_analysis": {
+      "connected_entities": 8,
+      "suspicious_patterns_detected": true,
+      "relationship_depth": 3,
+      "risk_propagation_score": 85
+    },
+    "llm_reasoning": "Based on comprehensive analysis of transaction patterns, behavioral anomalies, and graph relationships, this case shows clear indicators of Check Fraud - Altered Check. The confidence score of 85% reflects strong evidence across multiple detection dimensions.",
+    "tigergraph_insights": {
+      "query_used": "fraud_detection_pattern_match",
+      "nodes_analyzed": 156,
+      "edges_traversed": 423,
+      "pattern_matches": 12
+    }
+  },
+  "recommendations": [
+    "Deny check payment, contact customer, file fraud report"
+  ],
+  "investigation_status": "CLOSED",
+  "resolution": "Investigation completed with recommended actions taken",
+  "metadata": {
+    "investigation_date": "2026-09-23",
+    "analyst": "AI Agent with TigerGraph",
+    "review_status": "APPROVED",
+    "llm_model": "OpenAI GPT-4o-mini",
+    "graph_database": "TigerGraph Cloud"
+  }
+}

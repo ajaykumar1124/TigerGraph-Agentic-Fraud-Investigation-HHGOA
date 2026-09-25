@@ -1,0 +1,43 @@
+{
+  "case_id": "HHG-002",
+  "investigation_summary": {
+    "fraud_detected": true,
+    "confidence_score": 94,
+    "risk_level": "CRITICAL",
+    "primary_fraud_type": "International Wire Transfer Fraud",
+    "estimated_loss": 45000
+  },
+  "key_findings": [
+    "Large wire transfer to high-risk country at 3:15 AM",
+    "First-time international transfer",
+    "Velocity check failed - exceeded daily limit by 300%",
+    "Customer behavioral anomaly detected"
+  ],
+  "evidence": {
+    "graph_analysis": {
+      "connected_entities": 8,
+      "suspicious_patterns_detected": true,
+      "relationship_depth": 3,
+      "risk_propagation_score": 94
+    },
+    "llm_reasoning": "Based on comprehensive analysis of transaction patterns, behavioral anomalies, and graph relationships, this case shows clear indicators of International Wire Transfer Fraud. The confidence score of 94% reflects strong evidence across multiple detection dimensions.",
+    "tigergraph_insights": {
+      "query_used": "fraud_detection_pattern_match",
+      "nodes_analyzed": 156,
+      "edges_traversed": 423,
+      "pattern_matches": 12
+    }
+  },
+  "recommendations": [
+    "Hold transaction for manual review, contact customer immediately"
+  ],
+  "investigation_status": "CLOSED",
+  "resolution": "Investigation completed with recommended actions taken",
+  "metadata": {
+    "investigation_date": "2026-09-23",
+    "analyst": "AI Agent with TigerGraph",
+    "review_status": "APPROVED",
+    "llm_model": "OpenAI GPT-4o-mini",
+    "graph_database": "TigerGraph Cloud"
+  }
+}

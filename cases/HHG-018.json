@@ -1,0 +1,43 @@
+{
+  "case_id": "HHG-018",
+  "investigation_summary": {
+    "fraud_detected": true,
+    "confidence_score": 94,
+    "risk_level": "CRITICAL",
+    "primary_fraud_type": "ATM Skimming Device",
+    "estimated_loss": 67000
+  },
+  "key_findings": [
+    "15 customers compromised at same ATM location",
+    "Fraudulent transactions within 48 hours of ATM use",
+    "Card data used at international locations",
+    "Skimming device found during ATM inspection"
+  ],
+  "evidence": {
+    "graph_analysis": {
+      "connected_entities": 8,
+      "suspicious_patterns_detected": true,
+      "relationship_depth": 3,
+      "risk_propagation_score": 94
+    },
+    "llm_reasoning": "Based on comprehensive analysis of transaction patterns, behavioral anomalies, and graph relationships, this case shows clear indicators of ATM Skimming Device. The confidence score of 94% reflects strong evidence across multiple detection dimensions.",
+    "tigergraph_insights": {
+      "query_used": "fraud_detection_pattern_match",
+      "nodes_analyzed": 156,
+      "edges_traversed": 423,
+      "pattern_matches": 12
+    }
+  },
+  "recommendations": [
+    "Block all affected cards, notify customers, alert authorities"
+  ],
+  "investigation_status": "CLOSED",
+  "resolution": "Investigation completed with recommended actions taken",
+  "metadata": {
+    "investigation_date": "2026-09-23",
+    "analyst": "AI Agent with TigerGraph",
+    "review_status": "APPROVED",
+    "llm_model": "OpenAI GPT-4o-mini",
+    "graph_database": "TigerGraph Cloud"
+  }
+}

@@ -1,0 +1,86 @@
+/**
+ * QUERY: Find Similar Historical Cases
+ * 
+ * Purpose: Find past fraud cases similar to current investigation
+ * Used for case memory and learning from previous investigations
+ * 
+ * Input: fraud_pattern, risk_score_range
+ * Output: Historical cases with similar characteristics
+ */
+
+CREATE QUERY find_similar_historical_cases(
+  STRING fraud_pattern,
+  DOUBLE min_risk = 0.5,
+  DOUBLE max_risk = 1.0
+) FOR GRAPH fraud_investigation {
+  
+  SetAccum<VERTEX> similar_cases;
+  SetAccum<VERTEX> related_patterns;
+  
+  MapAccum<VERTEX, DOUBLE> similarity_score;
+  
+  // Step 1: Find all closed cases (historical)
+  SetAccum<VERTEX> closed_cases;
+  closed_cases =
+    SELECT c FROM FraudCase:c
+    WHERE c.case_status == "CLOSED"
+    ACCUM c += closed_cases;
+  
+  // Step 2: Filter by fraud pattern and risk range
+  similar_cases =
+    SELECT c FROM FraudCase:c
+    WHERE c IN closed_cases
+      AND c.fraud_pattern_detected == fraud_pattern
+      AND c.initial_risk_score >= min_risk
+      AND c.initial_risk_score <= max_risk
+    ACCUM c += similar_cases;
+  
+  // Step 3: Calculate similarity metrics for each case
+  FOREACH case IN similar_cases DO
+    DOUBLE similarity = 1.0;
+    
+    // Pattern match bonus
+    IF case.fraud_pattern_detected == fraud_pattern THEN
+      similarity += 0.2;
+    END;
+    
+    // Risk range proximity
+    DOUBLE risk_diff = ABS(case.current_risk_score - 0.75);
+    similarity -= (risk_diff * 0.1);
+    
+    similarity_score += (case -> similarity);
+  END;
+  
+  // Step 4: Get evidence from similar cases
+  SetAccum<VERTEX> related_evidence;
+  related_evidence =
+    SELECT e FROM FraudCase:c -(HAS_EVIDENCE)-> Evidence:e
+    WHERE c IN similar_cases
+    ACCUM e += related_evidence;
+  
+  // Step 5: Get action outcomes
+  SetAccum<VERTEX> related_actions;
+  related_actions =
+    SELECT a FROM FraudCase:c -(RECOMMENDS_ACTION)-> Action:a
+    WHERE c IN similar_cases
+    ACCUM a += related_actions;
+  
+  // Step 6: Return results ranked by similarity
+  SelectAccum<VERTEX> result;
+  result =
+    SELECT c FROM FraudCase:c
+    WHERE c IN similar_cases
+    POST-ACCUM
+      c.@similarity = similarity_score.get(c),
+      c.@evidence_count = 
+        SELECT COUNT(*) FROM FraudCase:fc -(HAS_EVIDENCE)-> Evidence:e
+        WHERE fc == c,
+      c.@recommended_action = 
+        SELECT a.action_type FROM FraudCase:fc -(RECOMMENDS_ACTION)-> Action:a
+        WHERE fc == c
+        LIMIT 1
+    ORDER BY c.@similarity DESC
+    LIMIT 5;
+  
+  PRINT result;
+}

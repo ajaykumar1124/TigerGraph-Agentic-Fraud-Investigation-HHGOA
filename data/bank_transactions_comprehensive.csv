@@ -1,0 +1,51 @@
+transaction_id,user_id,amount,timestamp,transaction_type,merchant,location,device_id,ip_address,status,risk_score,flags
+TXN_2026_001,USR_1001,15000.00,2026-09-23T10:15:30,withdrawal,ATM_MUM_001,Mumbai,DEV_001,103.45.67.89,fraudulent,0.92,"unusual_amount,unusual_location,unusual_time"
+TXN_2026_002,USR_1002,250.50,2026-09-23T09:30:15,purchase,Amazon India,Online,DEV_002,101.23.45.67,safe,0.12,
+TXN_2026_003,USR_1003,8500.00,2026-09-23T11:45:20,transfer,IMPS Transfer,Mobile App,DEV_003,102.34.56.78,suspicious,0.68,"unusual_amount,rapid_succession"
+TXN_2026_004,USR_1001,12000.00,2026-09-23T10:25:45,withdrawal,ATM_DEL_045,Delhi,DEV_004,110.56.78.90,fraudulent,0.95,"impossible_travel,unusual_amount,account_takeover"
+TXN_2026_005,USR_1004,450.00,2026-09-23T14:20:10,purchase,Westside,Bangalore,DEV_005,103.12.34.56,safe,0.08,
+TXN_2026_006,USR_1005,25000.00,2026-09-23T15:30:00,wire_transfer,SWIFT Transfer,International,DEV_006,104.67.89.01,suspicious,0.75,"large_amount,international,new_recipient"
+TXN_2026_007,USR_1006,120.00,2026-09-23T16:10:30,purchase,Flipkart,Online,DEV_007,105.78.90.12,safe,0.05,
+TXN_2026_008,USR_1003,9000.00,2026-09-23T11:50:00,transfer,NEFT Transfer,Mobile App,DEV_003,102.34.56.78,suspicious,0.72,"rapid_succession,unusual_amount"
+TXN_2026_009,USR_1007,35000.00,2026-09-23T08:00:00,withdrawal,ATM_CHE_023,Chennai,DEV_008,106.89.01.23,fraudulent,0.89,"unusual_time,large_amount,unusual_location"
+TXN_2026_010,USR_1008,780.00,2026-09-23T12:30:00,purchase,Swiggy,Restaurant,DEV_009,107.90.12.34,safe,0.15,
+TXN_2026_011,USR_1009,45000.00,2026-09-23T03:15:00,wire_transfer,International Wire,London,DEV_010,108.01.23.45,fraudulent,0.94,"unusual_time,large_amount,suspicious_country,velocity_check_failed"
+TXN_2026_012,USR_1010,180.00,2026-09-23T13:45:00,purchase,BookMyShow,Online,DEV_011,109.12.34.56,safe,0.06,
+TXN_2026_013,USR_1011,5500.00,2026-09-23T17:20:00,transfer,UPI Transfer,Mobile App,DEV_012,110.23.45.67,safe,0.22,
+TXN_2026_014,USR_1003,7800.00,2026-09-23T11:55:00,withdrawal,ATM_BAN_067,Bangalore,DEV_003,102.34.56.78,suspicious,0.65,"rapid_succession,multiple_locations"
+TXN_2026_015,USR_1012,320.00,2026-09-23T18:00:00,purchase,Zomato,Restaurant,DEV_013,111.34.56.78,safe,0.10,
+TXN_2026_016,USR_1013,95000.00,2026-09-23T02:30:00,wire_transfer,Crypto Exchange,Hong Kong,DEV_014,112.45.67.89,fraudulent,0.96,"unusual_time,crypto_related,high_risk_country,kyc_mismatch"
+TXN_2026_017,USR_1014,550.00,2026-09-23T10:00:00,purchase,Big Bazaar,Hyderabad,DEV_015,113.56.78.90,safe,0.11,
+TXN_2026_018,USR_1015,18000.00,2026-09-23T23:45:00,withdrawal,ATM_KOL_089,Kolkata,DEV_016,114.67.89.01,suspicious,0.78,"unusual_time,large_amount,first_foreign_atm"
+TXN_2026_019,USR_1001,8000.00,2026-09-23T10:35:00,purchase,Jewelry Store,Mumbai,DEV_017,115.78.90.12,fraudulent,0.91,"card_present_fraud,stolen_card,multiple_failed_attempts"
+TXN_2026_020,USR_1016,290.00,2026-09-23T14:15:00,purchase,Uber,Transportation,DEV_018,116.89.01.23,safe,0.09,
+TXN_2026_021,USR_1017,72000.00,2026-09-23T04:00:00,transfer,RTGS Transfer,Pune,DEV_019,117.90.12.34,suspicious,0.82,"unusual_time,large_amount,dormant_account_activity"
+TXN_2026_022,USR_1018,145.00,2026-09-23T19:30:00,purchase,McDonald's,Restaurant,DEV_020,118.01.23.45,safe,0.07,
+TXN_2026_023,USR_1019,150000.00,2026-09-23T01:15:00,wire_transfer,Shell Company,Nigeria,DEV_021,119.12.34.56,fraudulent,0.98,"unusual_time,suspicious_country,high_amount,known_fraud_pattern,blacklisted_recipient"
+TXN_2026_024,USR_1020,890.00,2026-09-23T11:20:00,purchase,Lifestyle,Mumbai,DEV_022,120.23.45.67,safe,0.13,
+TXN_2026_025,USR_1021,32000.00,2026-09-23T22:00:00,withdrawal,ATM_MUM_156,Mumbai,DEV_023,121.34.56.78,suspicious,0.71,"unusual_time,large_amount,unusual_behavior"
+TXN_2026_026,USR_1005,28000.00,2026-09-23T15:45:00,wire_transfer,Investment Account,Singapore,DEV_006,104.67.89.01,suspicious,0.69,"large_amount,international,investment_related"
+TXN_2026_027,USR_1022,420.00,2026-09-23T16:30:00,purchase,Starbucks,Bangalore,DEV_024,122.45.67.89,safe,0.08,
+TXN_2026_028,USR_1023,11000.00,2026-09-23T10:15:00,transfer,IMPS Transfer,Mobile App,DEV_025,123.56.78.90,safe,0.28,
+TXN_2026_029,USR_1007,42000.00,2026-09-23T08:10:00,withdrawal,ATM_CHE_045,Chennai,DEV_026,124.67.89.01,fraudulent,0.93,"duplicate_device,unusual_time,stolen_credentials"
+TXN_2026_030,USR_1024,675.00,2026-09-23T13:00:00,purchase,Myntra,Online,DEV_027,125.78.90.12,safe,0.14,
+TXN_2026_031,USR_1025,55000.00,2026-09-23T05:30:00,wire_transfer,Offshore Account,Cayman Islands,DEV_028,126.89.01.23,fraudulent,0.97,"unusual_time,tax_haven,suspicious_pattern,structuring_suspected"
+TXN_2026_032,USR_1026,230.00,2026-09-23T17:45:00,purchase,Domino's,Restaurant,DEV_029,127.90.12.34,safe,0.06,
+TXN_2026_033,USR_1003,6500.00,2026-09-23T12:00:00,withdrawal,ATM_BAN_089,Bangalore,DEV_003,102.34.56.78,suspicious,0.67,"velocity_exceeded,multiple_locations_short_time"
+TXN_2026_034,USR_1027,1200.00,2026-09-23T15:15:00,purchase,Decathlon,Hyderabad,DEV_030,128.01.23.45,safe,0.18,
+TXN_2026_035,USR_1028,88000.00,2026-09-23T03:45:00,transfer,Suspicious Entity,Unknown,DEV_031,129.12.34.56,fraudulent,0.99,"unusual_time,pep_related,sanctions_list_match,aml_alert"
+TXN_2026_036,USR_1029,340.00,2026-09-23T12:15:00,purchase,Reliance Fresh,Mumbai,DEV_032,130.23.45.67,safe,0.10,
+TXN_2026_037,USR_1030,14500.00,2026-09-23T21:30:00,withdrawal,ATM_DEL_156,Delhi,DEV_033,131.34.56.78,suspicious,0.74,"unusual_time,atm_skimming_suspected"
+TXN_2026_038,USR_1031,590.00,2026-09-23T14:00:00,purchase,PayTM Mall,Online,DEV_034,132.45.67.89,safe,0.12,
+TXN_2026_039,USR_1013,120000.00,2026-09-23T02:00:00,wire_transfer,Gambling Site,Malta,DEV_014,112.45.67.89,fraudulent,0.95,"unusual_time,gambling_related,high_risk_merchant,compulsive_pattern"
+TXN_2026_040,USR_1032,870.00,2026-09-23T18:30:00,purchase,Shoppers Stop,Bangalore,DEV_035,133.56.78.90,safe,0.15,
+TXN_2026_041,USR_1033,22000.00,2026-09-23T23:15:00,transfer,Unknown Recipient,Mobile App,DEV_036,134.67.89.01,suspicious,0.80,"unusual_time,new_payee,large_first_transaction"
+TXN_2026_042,USR_1034,195.00,2026-09-23T11:45:00,purchase,Cafe Coffee Day,Chennai,DEV_037,135.78.90.12,safe,0.07,
+TXN_2026_043,USR_1035,65000.00,2026-09-23T04:30:00,withdrawal,ATM_MUM_234,Mumbai,DEV_038,136.89.01.23,fraudulent,0.94,"unusual_time,card_not_present,pin_bypass_detected"
+TXN_2026_044,USR_1036,480.00,2026-09-23T16:00:00,purchase,Lenskart,Online,DEV_039,137.90.12.34,safe,0.09,
+TXN_2026_045,USR_1037,38000.00,2026-09-23T20:45:00,transfer,Money Mule Account,Pune,DEV_040,138.01.23.45,fraudulent,0.96,"money_laundering_suspected,layering_activity,suspicious_network"
+TXN_2026_046,USR_1038,725.00,2026-09-23T13:30:00,purchase,Tanishq,Hyderabad,DEV_041,139.12.34.56,safe,0.16,
+TXN_2026_047,USR_1039,51000.00,2026-09-23T06:00:00,wire_transfer,High Risk Country,Iran,DEV_042,140.23.45.67,fraudulent,0.98,"sanctions_violation,high_risk_jurisdiction,ofac_alert"
+TXN_2026_048,USR_1040,310.00,2026-09-23T15:00:00,purchase,Spencer's,Kolkata,DEV_043,141.34.56.78,safe,0.11,
+TXN_2026_049,USR_1041,19500.00,2026-09-23T22:30:00,withdrawal,ATM_BAN_201,Bangalore,DEV_044,142.45.67.89,suspicious,0.76,"unusual_time,behavioral_anomaly"
+TXN_2026_050,USR_1042,650.00,2026-09-23T17:15:00,purchase,PVR Cinemas,Mumbai,DEV_045,143.56.78.90,safe,0.13,

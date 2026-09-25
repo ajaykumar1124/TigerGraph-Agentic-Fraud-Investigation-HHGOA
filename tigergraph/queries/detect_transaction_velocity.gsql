@@ -1,0 +1,90 @@
+/**
+ * QUERY: Detect Transaction Velocity Anomalies
+ * 
+ * Purpose: Calculate transaction velocity metrics (frequency, amount) over time windows
+ * Used to identify unusual patterns like rapid-fire transactions
+ * 
+ * Input: customer_id, time_window_minutes (e.g., 60 for last hour)
+ * Output: Velocity metrics, anomaly score
+ */
+
+CREATE QUERY detect_transaction_velocity(
+  STRING customer_id,
+  INT time_window_minutes = 60
+) FOR GRAPH fraud_investigation {
+  
+  MapAccum<STRING, INT> velocity_metrics;
+  MapAccum<STRING, DOUBLE> amount_metrics;
+  
+  // Step 1: Get all transactions for customer
+  SetAccum<VERTEX> recent_transactions;
+  DateTime cutoff_time = now_epoch() - (time_window_minutes * 60);
+  
+  recent_transactions =
+    SELECT t FROM Customer:c -(PERFORMS)-> Transaction:t
+    WHERE c.customer_id == customer_id
+      AND string_to_epoch(t.timestamp) >= cutoff_time
+    ACCUM t += recent_transactions;
+  
+  // Step 2: Calculate velocity metrics
+  INT tx_count = recent_transactions.size();
+  DOUBLE total_amount = 0;
+  DOUBLE avg_amount = 0;
+  DOUBLE max_amount = 0;
+  INT merchant_count = 0;
+  
+  FOREACH tx IN recent_transactions DO
+    total_amount += tx.amount;
+    IF tx.amount > max_amount THEN
+      max_amount = tx.amount;
+    END;
+  END;
+  
+  IF tx_count > 0 THEN
+    avg_amount = total_amount / tx_count;
+  END;
+  
+  // Step 3: Count unique merchants
+  SetAccum<VERTEX> merchants_used;
+  merchants_used =
+    SELECT m FROM Transaction:t -(TRANSACTION_TO)-> Merchant:m
+    WHERE t IN recent_transactions
+    ACCUM m += merchants_used;
+  
+  merchant_count = merchants_used.size();
+  
+  // Step 4: Calculate anomaly score
+  // High velocity = many transactions + diverse merchants + large amounts
+  DOUBLE velocity_score = 0;
+  
+  IF tx_count > 10 THEN
+    velocity_score += 0.3;
+  END;
+  
+  IF avg_amount > 500 THEN
+    velocity_score += 0.2;
+  END;
+  
+  IF merchant_count > 5 THEN
+    velocity_score += 0.3;
+  END;
+  
+  IF max_amount > 10000 THEN
+    velocity_score += 0.2;
+  END;
+  
+  // Step 5: Return metrics
+  SelectAccum<VERTEX> result;
+  result =
+    SELECT c FROM Customer:c
+    WHERE c.customer_id == customer_id
+    POST-ACCUM
+      c.@transaction_count_recent = tx_count,
+      c.@total_amount_recent = total_amount,
+      c.@avg_transaction_amount = avg_amount,
+      c.@max_transaction_amount = max_amount,
+      c.@unique_merchants = merchant_count,
+      c.@velocity_anomaly_score = velocity_score;
+  
+  PRINT result;
+}

@@ -1,0 +1,55 @@
+/**
+ * QUERY: Find Shared Devices
+ * 
+ * Purpose: Identify all customers who share a device with a given customer
+ * This is a key fraud signal - shared devices often indicate fraud networks
+ * 
+ * Input: customer_id, device_threshold (min # of customers to be suspicious)
+ * Output: List of connected customers, device info, transaction counts
+ */
+
+CREATE QUERY find_shared_devices(
+  STRING customer_id,
+  INT device_threshold = 1
+) FOR GRAPH fraud_investigation {
+  
+  SetAccum<VERTEX> shared_device_customers;
+  SetAccum<VERTEX> devices_used;
+  MapAccum<VERTEX, INT> customer_transaction_count;
+  MapAccum<VERTEX, STRING> device_details;
+  
+  // Step 1: Find devices used by the input customer
+  devices_used = 
+    SELECT d FROM Customer:c -(USES_DEVICE)-> Device:d
+    WHERE c.customer_id == customer_id
+    ACCUM d += devices_used;
+  
+  // Step 2: Find all other customers using those same devices
+  shared_device_customers =
+    SELECT c FROM Device:d -(USED_BY_CUSTOMER)-> Customer:c
+    WHERE d IN devices_used
+    ACCUM device_details += (d -> d.device_id + "_" + d.device_type);
+  
+  // Step 3: For each shared customer, count transactions
+  FOREACH customer IN shared_device_customers DO
+    INT tx_count = 
+      SELECT COUNT(*) FROM Customer:c -(PERFORMS)-> Transaction:t
+      WHERE c.customer_id == customer.customer_id;
+    
+    customer_transaction_count += (customer -> tx_count);
+  END;
+  
+  // Step 4: Filter by threshold and return results
+  SetAccum<VERTEX> result_customers;
+  INT device_count_per_customer = devices_used.size();
+  
+  result_customers =
+    SELECT c FROM Customer:c
+    WHERE c IN shared_device_customers
+    POST-ACCUM 
+      c.@shared_device_count = device_count_per_customer,
+      c.@transaction_count = customer_transaction_count.get(c),
+      c.@shared_device_ids = device_details.values();
+  
+  PRINT result_customers;
+}
