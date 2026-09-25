@@ -1,0 +1,22 @@
+# Ignore Python backend
+backend/
+requirements.txt
+.env
+.pytest_cache/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+
+# Ignore other non-frontend files
+tigergraph/
+tests/
+scripts/
+data/
+docs/
+
+# Keep only frontend
+!frontend/
